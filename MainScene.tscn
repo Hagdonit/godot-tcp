@@ -1,0 +1,124 @@
+[gd_scene load_steps=2 format=3 uid="uid://bax4ap0i86cye"]
+
+[ext_resource type="Script" path="res://GameManager.cs" id="1_8d3we"]
+
+[node name="MainScene" type="Node" node_paths=PackedStringArray("ChatInput", "SendButton", "ConnectButton", "DisconnectButton", "ChatOutput")]
+script = ExtResource("1_8d3we")
+ChatInput = NodePath("CanvasLayer/VBoxContainer/NinePatchRect/CenterContainer/VBoxContainer/ChatInput")
+SendButton = NodePath("CanvasLayer/VBoxContainer/NinePatchRect/CenterContainer/VBoxContainer/Button")
+ConnectButton = NodePath("CanvasLayer/MarginContainer/Button")
+DisconnectButton = NodePath("CanvasLayer/MarginContainer/Button")
+ChatOutput = NodePath("CanvasLayer/VBoxContainer/NinePatchRect2/CenterContainer/NinePatchRect/VBoxContainer/MarginContainer/RichTextLabel")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="NinePatchRect" type="NinePatchRect" parent="CanvasLayer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/VBoxContainer/NinePatchRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/VBoxContainer/NinePatchRect/CenterContainer"]
+custom_minimum_size = Vector2(680, 140)
+layout_mode = 2
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Button" type="Button" parent="CanvasLayer/VBoxContainer/NinePatchRect/CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 24
+toggle_mode = true
+button_pressed = true
+action_mode = 0
+text = "Send Message"
+metadata/_edit_use_anchors_ = true
+
+[node name="ChatInput" type="TextEdit" parent="CanvasLayer/VBoxContainer/NinePatchRect/CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 18
+placeholder_text = "Send message..."
+
+[node name="NinePatchRect2" type="NinePatchRect" parent="CanvasLayer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 460)
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/VBoxContainer/NinePatchRect2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="NinePatchRect" type="NinePatchRect" parent="CanvasLayer/VBoxContainer/NinePatchRect2/CenterContainer"]
+custom_minimum_size = Vector2(680, 240)
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/VBoxContainer/NinePatchRect2/CenterContainer/NinePatchRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.40833, 0.408329, 0.408329, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/VBoxContainer/NinePatchRect2/CenterContainer/NinePatchRect"]
+custom_minimum_size = Vector2(520, 440)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/VBoxContainer/NinePatchRect2/CenterContainer/NinePatchRect/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/VBoxContainer/NinePatchRect2/CenterContainer/NinePatchRect/VBoxContainer/MarginContainer"]
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/VBoxContainer/NinePatchRect2/CenterContainer/NinePatchRect/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 24
+bbcode_enabled = true
+scroll_following = true
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
+offset_right = 195.0
+offset_bottom = 80.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+
+[node name="Button" type="Button" parent="CanvasLayer/MarginContainer"]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+action_mode = 0
+text = "Connection"

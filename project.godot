@@ -10,15 +10,29 @@ config_version=5
 
 [application]
 
-config/name="Godot-websocket"
+config/name="Godot-TCP"
 run/main_scene="res://MainScene.tscn"
 config/features=PackedStringArray("4.2", "C#", "Mobile")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/always_on_top=true
+window/size/transparent=true
+window/stretch/mode="viewport"
+window/stretch/aspect="expand"
+window/per_pixel_transparency/allowed=true
+window/handheld/orientation=1
+
 [dotnet]
 
-project/assembly_name="Godot-websocket"
+project/assembly_name="Godot-TCP"
+
+[editor]
+
+script/templates_search_path="res://ScriptTemplates"
 
 [rendering]
 
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

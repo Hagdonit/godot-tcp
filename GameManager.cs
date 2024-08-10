@@ -1,19 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Godot;
 
-namespace Godotwebsocket;
+namespace GodotTCP;
 
 [Tool]
 public partial class GameManager : Node
 {
-	private ClientWebSocket _webSocket = new();
-	private CancellationTokenSource _cancellationTokenSource = new();
 	
 	[Export] public TextEdit ChatInput;
 	[Export] public Button SendButton;
@@ -22,136 +15,77 @@ public partial class GameManager : Node
 	[Export] public RichTextLabel ChatOutput;
 	private readonly List<string> _chatMessages = new();
 
+	private StreamPeerTcp _tcpClient = new();
+	private bool _connected = false;
+	private string _deviceId;
+
 	public override void _Ready()
 	{
-		if (ConnectButton != null)
-			ConnectButton.Pressed += OnEventConnectWebSocket;
-		
-		if (SendButton != null)
-			SendButton.Pressed += OnSendButtonPressed;
-		
+		_deviceId = OS.GetUniqueId();
+		ConnectToServer("localhost", 8123);
+	}
+	
+	public override void _Process(double delta)
+	{
+		if (!_connected || _tcpClient.GetAvailableBytes() <= 0) return;
+		var dataBytes = _tcpClient.GetAvailableBytes();
+		var data = _tcpClient.GetData(dataBytes);
+		var message = data.ToString();
+		// string message = System.Text.Encoding.UTF8.GetString(data.);
+		GD.Print("Received from server: " + message);
 	}
 
 	public override void _ExitTree()
 	{
-		_cancellationTokenSource.Cancel();
-		_webSocket?.Dispose();
-	}
-	
-	private void RenderMessages()
-	{
-		ChatOutput.Text = "";
-		
-		foreach (var message in _chatMessages)
+		if (_connected)
 		{
-			ChatOutput.Text += $"{message}\n";
-		}
-	}
-	
-	private async void ConnectToWebSocket()
-	{
-		try
-		{
-			_webSocket = new ClientWebSocket();
-			if (_webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
+			try
 			{
-				GD.Print("WebSocket is already connected or in the process of connecting.");
-				return;
+				_tcpClient.DisconnectFromHost();
+				GD.Print("Disconnected from server.");
 			}
-			// Khởi tạo WebSocket client
-			GD.Print("Connecting to WebSocket server...");
-			await _webSocket.ConnectAsync(new Uri("ws://localhost:8080"), _cancellationTokenSource.Token);
-			GD.Print("Connected to WebSocket server");
-
-			// Đọc tin nhắn từ server
-			await ReceiveMessages();
-		}
-		catch (Exception e)
-		{
-			GD.PrintErr($"WebSocket connection failed: {e.Message}");
-		}
-	}
-	
-	private void OnEventConnectWebSocket()
-	{
-		if (_webSocket.State == WebSocketState.Open)
-		{
-			GD.Print("WebSocket is already connected");
-			Task.Run(CloseConnection);
-			_chatMessages.Add("Say goodbye...");
-			RenderMessages();
-			return;
-		}
-		
-		// Kết nối tới WebSocket server
-		ConnectToWebSocket();
-	}
-	
-	private async Task CloseConnection()
-	{
-		if (_webSocket.State != WebSocketState.Open) return;
-		
-		await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by the client", CancellationToken.None);
-		
-		return;
-	}
-
-	private void OnSendButtonPressed()
-	{
-		if (ChatInput.Text.Length <= 0) return;
-		var text = ChatInput.Text;
-		
-		SendMessage(text);
-		ChatInput.Text = "";
-		text = "*Me*: " + text;
-		_chatMessages.Add(text);
-	}
-	
-	private async Task ReceiveMessages()
-	{
-		var buffer = new byte[1024];
-
-		try
-		{
-			while (_webSocket.State is WebSocketState.Open)
+			catch (Exception ex)
 			{
-				var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cancellationTokenSource.Token);
-
-				switch (result.MessageType)
-				{
-					case WebSocketMessageType.Text:
-					{
-						var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-						GD.Print($"Message received: {message}");
-					
-						_chatMessages.Add(message);
-						RenderMessages();
-						break;
-					}
-					// case WebSocketMessageType.Close:
-					// 	await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by the client", CancellationToken.None);
-					// 	GD.Print("WebSocket connection closed");
-					// 	break;
-					case WebSocketMessageType.Binary:
-					default:
-						break;
-				}
+				GD.Print("Exception during disconnect: " + ex.Message);
+			}
+			finally
+			{
+				_connected = false;
 			}
 		}
-		catch (Exception e)
+
+	}
+
+
+	public void ConnectToServer(string ipAddress, int port)
+	{
+		var err = _tcpClient.ConnectToHost(ipAddress, port);
+		
+		GD.Print("Connecting to server... " + ipAddress + ":" + port, ",  Error:", err.ToString());
+		
+		if (err == Error.Ok)
 		{
-			GD.PrintErr($"WebSocket receive error: {e.Message}");
+			GD.Print("Connected to server.");
+			_connected = true;
+		}
+		else
+		{
+			GD.Print("Failed to connect: " + err);
 		}
 	}
 
-	public async void SendMessage(string message)
+	public void SendMessage(string message)
 	{
-		if (_webSocket.State != WebSocketState.Open) return;
-		
-		GD.Print($"Sending message: {message}");
-		var messageBuffer = Encoding.UTF8.GetBytes(message);
-		await _webSocket.SendAsync(new ArraySegment<byte>(messageBuffer), WebSocketMessageType.Text, true, _cancellationTokenSource.Token);
-		RenderMessages();
+		if (_connected)
+		{
+			byte[] data = System.Text.Encoding.UTF8.GetBytes(message);
+			_tcpClient.PutData(data);
+			GD.Print("Sent to server: " + message);
+		}
+		else
+		{
+			GD.Print("Not connected to the server.");
+		}
 	}
 
 	public override string[] _GetConfigurationWarnings()
